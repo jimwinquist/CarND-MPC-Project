@@ -1,6 +1,22 @@
 # CarND-Controls-MPC
 Self-Driving Car Engineer Nanodegree Program
 
+## Model
+
+I implemented a cost function that took into account crosstrack error, orientation error, velocity error, steering error, throttle error, sequential steering error, and sequential throttle error. Of these I weighted the value gap between sequential actuations the most heavily, and also manually tuned the rest of the cost function to penalize use of actuators and cross track error. My model takes a series of waypoints in world space, transforms them to vehicle space, and then uses them to fit a third order polynomial, to the predicted path. This is then used to calculate the crosstrack error and orientation error of the vehicle and these state variables are passed to the solver to convert the polynomial into predicted actuations for the vehicle.
+
+## Timestep Length and Elapsed Duration
+
+For the timestep I wanted the vehicle to be able to predict between 1 to 1.5 seconds into the future. The value T of the overall time horizon is calculated by the product N * dt or the number of timesteps times the duration of each timestep. I began by setting the timestep to 100 milliseconds to match the estimated latency of the vehicle and set the number of timesteps N to 15. These values worked ok, but ultimately the vehicle wasn't responsive enough and was too slow to react with such a large dt. I tried going to the opposite extreme and setting N=150 and dt=0.01 but this fine a timestep made the vehicle too quick to respond and it would often end up going off the road because it was constantly updating and trying to correct the vehicle towards the waypoints. Eventually I settled right in the middle with N=25 and dt=0.05 and this seemed to give the best responsiveness without being over reactive.
+
+## Polynomial Fitting
+
+In order to fit a polynomial to the waypoints, I converted the points from world space to vehicle space. This can be seen in main.cpp lines 101-108. 
+
+## Model Predictive Control with Latency 
+
+In order to control for latency I preprocessed the state of the vehicle to predict the state 100 milliseconds into the future and then pass this predicted state to the MPC solver. This produced actuations that corresponded with the next predicted state and allowed the car to drive at higher speeds while remaining fairly close to the reference waypoints. With this approach I was able to get the car to drive safely around the track at up to 60mph. Higher speeds are possible, but would probably require having a better dynamics model and further tuning the cost function to control the use of actuators and maintain the best possible crosstrack error.
+
 ---
 
 ## Dependencies
