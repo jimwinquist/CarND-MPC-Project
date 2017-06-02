@@ -110,13 +110,15 @@ int main() {
           // Fit a polynomial
           auto coeffs = polyfit(xvals, yvals, 3);
 
-          // Calculate error
-          double cte = polyeval(coeffs, 0);
+          // Calculate state variables with latency added
+          double latency = 0.1;
+          double x_1 = v * latency;
+          double cte = polyeval(coeffs, x_1);
           double epsi = -atan(coeffs(1));
 
           // Set state x position ahead 100ms before solving
           Eigen::VectorXd state(6);
-          state << v * 0.1, 0, 0, v, cte, epsi;
+          state << x_1, 0, 0, v, cte, epsi;
 
           vector<double> solution = mpc.Solve(state, coeffs);
 
